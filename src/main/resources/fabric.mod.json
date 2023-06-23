@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "netherite-anvil",
+  "version": "${version}",
+  "name": "Netherite anvil mod",
+  "description": "Add a upgraded anvil variation",
+  "authors": ["Vas Sferd"],
+  "contact": {
+    "repo": "https://github.com/sferd/netherite-anvill"
+  },
+  "license": "BSD-3-Clause",
+  "icon": "assets/netherite-anvil/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.gamenet.netherite_anvil.NetheriteAnvilMod"
+    ]
+  },
+  "mixins": [
+    "netherite-anvil.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
