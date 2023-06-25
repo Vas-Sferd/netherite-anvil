@@ -37,6 +37,11 @@ public class NetheriteAnvilMenu extends AnvilMenu {
     }
 
     @Override
+    protected boolean mayPickup(Player player, boolean bl) {
+        return (player.getAbilities().instabuild || player.experienceLevel >= this.cost.get()) && this.cost.get() >= 0;
+    }
+
+    @Override
     protected void onTake(Player player, ItemStack itemStack) {
         if (!player.getAbilities().instabuild) {
             player.giveExperienceLevels(-this.cost.get());
@@ -74,17 +79,33 @@ public class NetheriteAnvilMenu extends AnvilMenu {
 
         ItemStack resultItem = leftItem.copy();
 
+        if (this.itemName == null) {
+            this.itemName = leftItem.getHoverName().getString();
+        }
+
+        boolean itemNameChanged = !this.itemName.equals(leftItem.getHoverName().getString());
         if (StringUtils.isBlank(this.itemName)) {
             if (leftItem.hasCustomHoverName()) {
                 experienceLevelCost += COST_RENAME;
                 resultItem.resetHoverName();
             }
-        } else if (!this.itemName.equals(leftItem.getHoverName().getString())) {
+        } else if (itemNameChanged) {
             experienceLevelCost += COST_RENAME;
             resultItem.setHoverName(Component.literal(this.itemName));
         }
 
+        boolean isRightIsMaterialForRepair;
+        boolean isLeftAndRightSame;
+        boolean isRightIsEnchantedBook;
+        boolean isRightItemUnsuitable;
+        boolean isNothingChanged = true;
+
         if (!rightItemOrMaterial.isEmpty() && canRepairThisItemCount) {
+            isRightIsMaterialForRepair = resultItem.getItem().isValidRepairItem(leftItem, rightItemOrMaterial);
+            isLeftAndRightSame = rightItemOrMaterial.is(leftItem.getItem());
+            isRightIsEnchantedBook = rightItemOrMaterial.is(Items.ENCHANTED_BOOK) && !EnchantedBookItem.getEnchantments(rightItemOrMaterial).isEmpty();
+            isRightItemUnsuitable = !(isRightIsMaterialForRepair || isLeftAndRightSame || isRightIsEnchantedBook);
+
             int leftRepairCost = leftItem.getBaseRepairCost();
             int rightRepairCost = rightItemOrMaterial.getBaseRepairCost();
 
@@ -92,15 +113,16 @@ public class NetheriteAnvilMenu extends AnvilMenu {
             experienceLevelCost += baseRepairCost;
 
             if (leftItem.isDamageableItem()) {
-                if (resultItem.getItem().isValidRepairItem(leftItem, rightItemOrMaterial))
+
+                if (isRightIsMaterialForRepair)
                 {
                     experienceLevelCost += repairByMaterial(resultItem, rightItemOrMaterial) * COST_REPAIR_MATERIAL;
-                } else if (rightItemOrMaterial.is(leftItem.getItem())) {
+                } else if (isLeftAndRightSame) {
                     experienceLevelCost += repairBySameItem(resultItem, rightItemOrMaterial) * COST_REPAIR_SACRIFICE;
                 }
             }
-            boolean isRightIsEnchantedBook = rightItemOrMaterial.is(Items.ENCHANTED_BOOK) && !EnchantedBookItem.getEnchantments(rightItemOrMaterial).isEmpty();
-            if (rightItemOrMaterial.isEnchanted() || isRightIsEnchantedBook) {
+
+            if (isLeftAndRightSame && rightItemOrMaterial.isEnchanted() || isRightIsEnchantedBook) {
                 Map<Enchantment, Integer> resultEnchantments = EnchantmentHelper.getEnchantments(resultItem);
                 Map<Enchantment, Integer> rightEnchantments = EnchantmentHelper.getEnchantments(rightItemOrMaterial);
 
@@ -151,20 +173,29 @@ public class NetheriteAnvilMenu extends AnvilMenu {
                 }
                 if (hasUnsuitableEnchantment && !hasSuitableEnchantment) {
                     this.resultSlots.setItem(0, ItemStack.EMPTY);
-                    this.cost.set(0);
+                    this.cost.set(COST_FAIL);
                     return;
                 }
                 EnchantmentHelper.setEnchantments(resultEnchantments, resultItem);
             }
+            isNothingChanged = isRightItemUnsuitable && !itemNameChanged;
         }
 
-        this.cost.set(experienceLevelCost / COST_REDUCTION_FACTOR);
+
+
+        int reducedExperienceLevelCost = experienceLevelCost / COST_REDUCTION_FACTOR;
+
+
+
+        boolean isExperienceLimitExceed = reducedExperienceLevelCost >= COST_MAX && !this.player.getAbilities().instabuild;
+        if (isNothingChanged || isExperienceLimitExceed) {
+            this.resultSlots.setItem(0, ItemStack.EMPTY);
+            this.cost.set(COST_FAIL);
+            return;
+        }
+
+        this.cost.set(reducedExperienceLevelCost);
         resultItem.setRepairCost(1);
-
-        if (this.cost.get() >= COST_MAX && !this.player.getAbilities().instabuild) {
-            resultItem = ItemStack.EMPTY;
-        }
-
         this.resultSlots.setItem(0, resultItem);
         this.broadcastChanges();
     }
