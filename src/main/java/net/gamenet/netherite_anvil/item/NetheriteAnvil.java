@@ -1,10 +1,12 @@
 package net.gamenet.netherite_anvil.item;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.gamenet.netherite_anvil.menu.NetheriteAnvilMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -51,7 +53,7 @@ public class NetheriteAnvil extends FallingBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        return (BlockState)this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getClockWise());
+        return this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getClockWise());
     }
 
     @Override
@@ -67,7 +69,7 @@ public class NetheriteAnvil extends FallingBlock {
     @Override
     @Nullable
     public MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
-        return new SimpleMenuProvider((i, inventory, player) -> new AnvilMenu(i, inventory, ContainerLevelAccess.create(level, blockPos)), CONTAINER_TITLE);
+        return new SimpleMenuProvider((i, inventory, player) -> new NetheriteAnvilMenu(i, inventory, ContainerLevelAccess.create(level, blockPos)), CONTAINER_TITLE);
     }
 
     @Override
@@ -81,7 +83,7 @@ public class NetheriteAnvil extends FallingBlock {
 
     @Override
     protected void falling(FallingBlockEntity fallingBlockEntity) {
-        fallingBlockEntity.setHurtsEntities(2.0f, 40);
+        fallingBlockEntity.setHurtsEntities(FALL_DAMAGE_PER_DISTANCE, FALL_DAMAGE_MAX);
     }
 
     @Override
@@ -99,24 +101,13 @@ public class NetheriteAnvil extends FallingBlock {
     }
 
     @Override
-    public DamageSource getFallDamageSource() {
+    public @NotNull DamageSource getFallDamageSource() {
         return DamageSource.ANVIL;
     }
 
-    @Nullable
-    public static BlockState damage(BlockState blockState) {
-        if (blockState.is(Blocks.ANVIL)) {
-            return (BlockState)Blocks.CHIPPED_ANVIL.defaultBlockState().setValue(FACING, blockState.getValue(FACING));
-        }
-        if (blockState.is(Blocks.CHIPPED_ANVIL)) {
-            return (BlockState)Blocks.DAMAGED_ANVIL.defaultBlockState().setValue(FACING, blockState.getValue(FACING));
-        }
-        return null;
-    }
-
     @Override
-    public BlockState rotate(BlockState blockState, Rotation rotation) {
-        return (BlockState)blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
+    public @NotNull BlockState rotate(BlockState blockState, Rotation rotation) {
+        return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
     }
 
     @Override

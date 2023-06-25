@@ -1,8 +1,8 @@
 {
   "variants": {
-    "facing=north": { "model": "netherite-anvil:block/netherite_anvil_block", "uvlock": true },
-    "facing=east": { "model": "netherite-anvil:block/netherite_anvil_block", "y":  90, "uvlock": true },
-    "facing=south": { "model": "netherite-anvil:block/netherite_anvil_block", "y":  180, "uvlock": true },
-    "facing=west": { "model": "netherite-anvil:block/netherite_anvil_block", "y":  270, "uvlock": true }
+    "facing=north": { "model": "netherite-anvil:block/netherite_anvil_block" },
+    "facing=east": { "model": "netherite-anvil:block/netherite_anvil_block", "y":  90 },
+    "facing=south": { "model": "netherite-anvil:block/netherite_anvil_block", "y":  180 },
+    "facing=west": { "model": "netherite-anvil:block/netherite_anvil_block", "y":  270 }
   }
 }
