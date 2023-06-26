@@ -16,9 +16,6 @@
       "net.gamenet.netherite_anvil.NetheriteAnvilMod"
     ]
   },
-  "mixins": [
-    "netherite-anvil.mixins.json"
-  ],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
