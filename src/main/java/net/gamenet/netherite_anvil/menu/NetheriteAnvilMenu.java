@@ -45,7 +45,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
 
     @Override
     protected boolean mayPickup(Player player, boolean hasItem) {
-        return (player.getAbilities().instabuild || player.experienceLevel >= this.cost.get()) && hasItem && this.cost.get() >= 0;
+        return (player.getAbilities().instabuild || player.experienceLevel >= this.cost.get()) && this.cost.get() >= 0;
     }
 
     @Override
@@ -88,14 +88,16 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
 
         ItemStack resultItem = leftItem.copy();
 
+        player.sendSystemMessage(Component.literal(this.itemName + ":" + leftItem.getHoverName().getString() + ":" + resultItem.getHoverName().getString()));
+
         String leftName = leftItem.getHoverName().getString();
         boolean itemNameChanged = this.itemName != null && !StringUtils.isBlank(this.itemName) && !this.itemName.equals(leftName);
         if (StringUtils.isBlank(this.itemName)) {
-            if (leftItem.hasCustomHoverName()) {
+            if (resultItem.hasCustomHoverName()) {
                 experienceLevelCost += COST_RENAME;
                 resultItem.resetHoverName();
             }
-        } else if (itemNameChanged) {
+        } else if (!this.itemName.equals(resultItem.getHoverName().getString())) {
             experienceLevelCost += COST_RENAME;
             resultItem.setHoverName(Component.literal(this.itemName));
         }
@@ -119,7 +121,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
             isRightItemSuitable = false;
         }
 
-        if (isRightItemSuitable && canRepairThisItemCount) {
+        if (isRightItemSuitable) {
             int leftRepairCost = leftItem.getBaseRepairCost();
             int rightRepairCost = rightItemOrMaterial.getBaseRepairCost();
 
@@ -178,7 +180,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
                         case VERY_RARE -> enchantmentCost = 8;
                     }
 
-                    if (isRightCanProvideEnchantments) {
+                    if (rightItemOrMaterial.is(Items.ENCHANTED_BOOK)) {
                         enchantmentCost = Math.max(1, enchantmentCost / 2);
                     }
 
