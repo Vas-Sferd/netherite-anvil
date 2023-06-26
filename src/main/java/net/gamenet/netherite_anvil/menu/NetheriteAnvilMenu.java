@@ -1,22 +1,24 @@
 package net.gamenet.netherite_anvil.menu;
 
+import net.gamenet.netherite_anvil.NetheriteAnvilMod;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AnvilMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
-public class NetheriteAnvilMenu extends AnvilMenu {
+public class NetheriteAnvilMenu extends ItemCombinerMenu {
     private int repairItemCountCost;
+    private boolean sacrifice;
     private String itemName;
     private final DataSlot cost = DataSlot.standalone();
     private static final int COST_MAX = 150;
@@ -29,16 +31,22 @@ public class NetheriteAnvilMenu extends AnvilMenu {
     private static final int COST_REDUCTION_FACTOR = 2;
 
     public NetheriteAnvilMenu(int i, Inventory inventory) {
-        super(i, inventory);
+        this(i, inventory, ContainerLevelAccess.NULL);
     }
 
     public NetheriteAnvilMenu(int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
-        super(i, inventory, containerLevelAccess);
+        super(NetheriteAnvilMod.NETHERITE_ANVIL_MENU_TYPE, i, inventory, containerLevelAccess);
+        this.addDataSlot(this.cost);
     }
 
     @Override
-    protected boolean mayPickup(Player player, boolean bl) {
-        return (player.getAbilities().instabuild || player.experienceLevel >= this.cost.get()) && this.cost.get() >= 0;
+    protected boolean isValidBlock(BlockState blockState) {
+        return blockState.is(BlockTags.ANVIL);
+    }
+
+    @Override
+    protected boolean mayPickup(Player player, boolean hasItem) {
+        return (player.getAbilities().instabuild || player.experienceLevel >= this.cost.get()) && hasItem && this.cost.get() >= 0;
     }
 
     @Override
@@ -55,7 +63,7 @@ public class NetheriteAnvilMenu extends AnvilMenu {
             } else {
                 this.inputSlots.setItem(1, ItemStack.EMPTY);
             }
-        } else {
+        } else if (sacrifice) {
             this.inputSlots.setItem(1, ItemStack.EMPTY);
         }
         this.cost.set(0);
@@ -67,11 +75,13 @@ public class NetheriteAnvilMenu extends AnvilMenu {
     public void createResult() {
         ItemStack leftItem = this.inputSlots.getItem(0);
         ItemStack rightItemOrMaterial = this.inputSlots.getItem(1);
+        this.cost.set(0);
         int experienceLevelCost = COST_BASE;
         this.repairItemCountCost = 0;
+        this.sacrifice = false;
 
         boolean canRepairThisItemCount = leftItem.getCount() == 1 || this.player.getAbilities().instabuild;
-        if (leftItem.isEmpty() && canRepairThisItemCount) {
+        if (leftItem.isEmpty() || !canRepairThisItemCount) {
             this.resultSlots.setItem(0, ItemStack.EMPTY);
             this.cost.set(COST_FAIL);
             return;
@@ -79,11 +89,8 @@ public class NetheriteAnvilMenu extends AnvilMenu {
 
         ItemStack resultItem = leftItem.copy();
 
-        if (this.itemName == null) {
-            this.itemName = leftItem.getHoverName().getString();
-        }
-
-        boolean itemNameChanged = !this.itemName.equals(leftItem.getHoverName().getString());
+        String leftName = leftItem.getHoverName().getString();
+        boolean itemNameChanged = this.itemName != null && !StringUtils.isBlank(this.itemName) && !this.itemName.equals(leftName);
         if (StringUtils.isBlank(this.itemName)) {
             if (leftItem.hasCustomHoverName()) {
                 experienceLevelCost += COST_RENAME;
@@ -94,35 +101,42 @@ public class NetheriteAnvilMenu extends AnvilMenu {
             resultItem.setHoverName(Component.literal(this.itemName));
         }
 
+        boolean isResultNeedToRepairDamage = resultItem.isDamageableItem() && resultItem.isDamaged();
+
         boolean isRightIsMaterialForRepair;
-        boolean isLeftAndRightSame;
+        boolean isRightCanBeSacrifice;
         boolean isRightIsEnchantedBook;
-        boolean isRightItemUnsuitable;
-        boolean isNothingChanged = true;
+        boolean isRightItemSuitable;
 
-        if (!rightItemOrMaterial.isEmpty() && canRepairThisItemCount) {
+        if (!rightItemOrMaterial.isEmpty()) {
             isRightIsMaterialForRepair = resultItem.getItem().isValidRepairItem(leftItem, rightItemOrMaterial);
-            isLeftAndRightSame = rightItemOrMaterial.is(leftItem.getItem());
+            isRightCanBeSacrifice = rightItemOrMaterial.is(leftItem.getItem());
             isRightIsEnchantedBook = rightItemOrMaterial.is(Items.ENCHANTED_BOOK) && !EnchantedBookItem.getEnchantments(rightItemOrMaterial).isEmpty();
-            isRightItemUnsuitable = !(isRightIsMaterialForRepair || isLeftAndRightSame || isRightIsEnchantedBook);
+            isRightItemSuitable = isRightIsMaterialForRepair || isRightCanBeSacrifice || isRightIsEnchantedBook;
+        } else {
+            isRightIsMaterialForRepair = false;
+            isRightCanBeSacrifice = false;
+            isRightIsEnchantedBook = false;
+            isRightItemSuitable = false;
+        }
 
+        if (isRightItemSuitable && canRepairThisItemCount) {
             int leftRepairCost = leftItem.getBaseRepairCost();
             int rightRepairCost = rightItemOrMaterial.getBaseRepairCost();
 
             int baseRepairCost = leftRepairCost + rightRepairCost;
             experienceLevelCost += baseRepairCost;
 
-            if (leftItem.isDamageableItem()) {
-
+            if (isResultNeedToRepairDamage) {
                 if (isRightIsMaterialForRepair)
                 {
                     experienceLevelCost += repairByMaterial(resultItem, rightItemOrMaterial) * COST_REPAIR_MATERIAL;
-                } else if (isLeftAndRightSame) {
+                } else if (isRightCanBeSacrifice) {
                     experienceLevelCost += repairBySameItem(resultItem, rightItemOrMaterial) * COST_REPAIR_SACRIFICE;
                 }
             }
 
-            if (isLeftAndRightSame && rightItemOrMaterial.isEnchanted() || isRightIsEnchantedBook) {
+            if (isRightCanBeSacrifice && rightItemOrMaterial.isEnchanted() || isRightIsEnchantedBook) {
                 Map<Enchantment, Integer> resultEnchantments = EnchantmentHelper.getEnchantments(resultItem);
                 Map<Enchantment, Integer> rightEnchantments = EnchantmentHelper.getEnchantments(rightItemOrMaterial);
 
@@ -178,24 +192,21 @@ public class NetheriteAnvilMenu extends AnvilMenu {
                 }
                 EnchantmentHelper.setEnchantments(resultEnchantments, resultItem);
             }
-            isNothingChanged = isRightItemUnsuitable && !itemNameChanged;
         }
-
-
 
         int reducedExperienceLevelCost = experienceLevelCost / COST_REDUCTION_FACTOR;
 
-
-
+        boolean isSomethingChanged = (itemNameChanged && rightItemOrMaterial.isEmpty()) || isRightItemSuitable;
         boolean isExperienceLimitExceed = reducedExperienceLevelCost >= COST_MAX && !this.player.getAbilities().instabuild;
-        if (isNothingChanged || isExperienceLimitExceed) {
+
+        if (!isSomethingChanged || isExperienceLimitExceed) {
             this.resultSlots.setItem(0, ItemStack.EMPTY);
             this.cost.set(COST_FAIL);
             return;
         }
 
         this.cost.set(reducedExperienceLevelCost);
-        resultItem.setRepairCost(1);
+        resultItem.setRepairCost(0);
         this.resultSlots.setItem(0, resultItem);
         this.broadcastChanges();
     }
@@ -231,12 +242,9 @@ public class NetheriteAnvilMenu extends AnvilMenu {
         int rightQuantify = right.getMaxDamage() - right.getDamageValue();
         int newQuantify = leftQuantity + rightQuantify + left.getMaxDamage() * 20 / 100;
         int newDamage = Math.max(0, left.getMaxDamage() - newQuantify);
-        int cost = 0;
-        if (newDamage < left.getDamageValue()) {
-            cost = 1;
-        }
+        sacrifice = true;
         left.setDamageValue(newDamage);
-        return cost;
+        return 1;
     }
 
     public int getCost() {
