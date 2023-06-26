@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smithing",
+  "base": {
+    "item": "minecraft:anvil"
+  },
+  "addition": {
+    "item": "netherite-anvil:netherite_anvil_smithing_template"
+  },
+  "result": {
+    "item": "netherite-anvil:netherite_anvil_block"
+  }
+}

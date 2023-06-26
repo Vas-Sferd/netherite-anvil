@@ -29,7 +29,8 @@ public class NetheriteAnvilMod implements ModInitializer {
 
     public static Block NETHERITE_ANVIL_BLOCK
             = Registry.register(Registry.BLOCK, new ResourceLocation(MOD_ID, "netherite_anvil_block"), new NetheriteAnvil((FabricBlockSettings) FabricBlockSettings.of(Material.HEAVY_METAL, MaterialColor.METAL)
-            .requiresCorrectToolForDrops().strength(5.0f, 1200.0f).sound(SoundType.ANVIL)
+            .requiresTool()
+            .requiresCorrectToolForDrops().strength(15.0f, 1200.0f).sound(SoundType.ANVIL)
     ));
 
     public static Item NETHERITE_ANVIL_BLOCK_ITEM

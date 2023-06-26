@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NNN",
+    "ONO",
+    "MOM"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "M": {
+      "item": "minecraft:copper_block"
+    }
+  },
+  "result": {
+    "item": "netherite-anvil:netherite_anvil_smithing_template",
+    "count": 1
+  }
+}
