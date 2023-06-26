@@ -137,6 +137,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
             }
 
             if (isRightCanProvideEnchantments) {
+                sacrifice = true;
                 Map<Enchantment, Integer> resultEnchantments = EnchantmentHelper.getEnchantments(resultItem);
                 Map<Enchantment, Integer> rightEnchantments = EnchantmentHelper.getEnchantments(rightItemOrMaterial);
 
