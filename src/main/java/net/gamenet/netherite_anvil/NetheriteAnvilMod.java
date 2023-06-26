@@ -5,8 +5,6 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.gamenet.netherite_anvil.item.NetheriteAnvil;
 import net.gamenet.netherite_anvil.menu.NetheriteAnvilMenu;
-import net.gamenet.netherite_anvil.screen.NetheriteAnvilScreen;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
@@ -41,6 +39,6 @@ public class NetheriteAnvilMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        MenuScreens.register(NETHERITE_ANVIL_MENU_TYPE, NetheriteAnvilScreen::new);
+
     }
 }
