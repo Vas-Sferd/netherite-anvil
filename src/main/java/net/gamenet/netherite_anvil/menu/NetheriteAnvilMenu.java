@@ -193,6 +193,10 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
             }
         }
 
+        if (resultItem.getCount() != 1) {
+            experienceLevelCost = Math.min(40, experienceLevelCost * resultItem.getCount());
+        }
+
         if (itemNameChanged && !isRightItemSuitable) {
             experienceLevelCost = COST_RENAME;
         }
