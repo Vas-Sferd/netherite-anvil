@@ -18,12 +18,11 @@ import java.util.Map;
 
 public class NetheriteAnvilMenu extends ItemCombinerMenu {
     private int repairItemCountCost;
-    private boolean sacrifice;
     private String itemName;
     private final DataSlot cost = DataSlot.standalone();
     private static final int COST_MAX = 150;
     private static final int COST_FAIL = 0;
-    private static final int COST_BASE = 1;
+    private static final int COST_BASE = 0;
     private static final int COST_REPAIR_MATERIAL = 1;
     private static final int COST_REPAIR_SACRIFICE = 2;
     private static final int COST_INCOMPATIBLE_PENALTY = 1;
@@ -63,9 +62,10 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
             } else {
                 this.inputSlots.setItem(1, ItemStack.EMPTY);
             }
-        } else if (sacrifice) {
+        } else {
             this.inputSlots.setItem(1, ItemStack.EMPTY);
         }
+
         this.cost.set(0);
         this.repairItemCountCost = 0;
         this.access.execute((level, blockPos) -> level.levelEvent(1030, blockPos, 0));
@@ -78,7 +78,6 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
         this.cost.set(0);
         int experienceLevelCost = COST_BASE;
         this.repairItemCountCost = 0;
-        this.sacrifice = false;
 
         boolean canRepairThisItemCount = leftItem.getCount() == 1 || this.player.getAbilities().instabuild;
         if (leftItem.isEmpty() || !canRepairThisItemCount) {
@@ -112,7 +111,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
             isRightIsMaterialForRepair = resultItem.getItem().isValidRepairItem(leftItem, rightItemOrMaterial);
             isRightCanBeSacrifice = rightItemOrMaterial.is(leftItem.getItem());
             isRightCanProvideEnchantments = isRightCanBeSacrifice && rightItemOrMaterial.isEnchanted() || (rightItemOrMaterial.is(Items.ENCHANTED_BOOK) && !EnchantedBookItem.getEnchantments(rightItemOrMaterial).isEmpty());
-            isRightItemSuitable = isRightIsMaterialForRepair || isRightCanBeSacrifice || isRightCanProvideEnchantments;
+            isRightItemSuitable = (isResultNeedToRepairDamage && (isRightIsMaterialForRepair || isRightCanBeSacrifice)) || isRightCanProvideEnchantments;
         } else {
             isRightIsMaterialForRepair = false;
             isRightCanBeSacrifice = false;
@@ -137,7 +136,6 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
             }
 
             if (isRightCanProvideEnchantments) {
-                sacrifice = true;
                 Map<Enchantment, Integer> resultEnchantments = EnchantmentHelper.getEnchantments(resultItem);
                 Map<Enchantment, Integer> rightEnchantments = EnchantmentHelper.getEnchantments(rightItemOrMaterial);
 
@@ -247,7 +245,6 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
         int rightQuantify = right.getMaxDamage() - right.getDamageValue();
         int newQuantify = leftQuantity + rightQuantify + left.getMaxDamage() * 20 / 100;
         int newDamage = Math.max(0, left.getMaxDamage() - newQuantify);
-        sacrifice = true;
         left.setDamageValue(newDamage);
         return 1;
     }
