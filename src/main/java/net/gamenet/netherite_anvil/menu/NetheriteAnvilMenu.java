@@ -79,7 +79,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
         int experienceLevelCost = COST_BASE;
         this.repairItemCountCost = 0;
 
-        boolean canRepairThisItemCount = leftItem.getCount() == 1 || this.player.getAbilities().instabuild;
+        boolean canRepairThisItemCount = leftItem.getCount() >= 0 || this.player.getAbilities().instabuild;
         if (leftItem.isEmpty() || !canRepairThisItemCount) {
             this.resultSlots.setItem(0, ItemStack.EMPTY);
             this.cost.set(COST_FAIL);
