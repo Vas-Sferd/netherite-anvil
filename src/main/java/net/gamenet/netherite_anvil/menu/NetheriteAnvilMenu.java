@@ -105,18 +105,18 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
 
         boolean isRightIsMaterialForRepair;
         boolean isRightCanBeSacrifice;
-        boolean isRightIsEnchantedBook;
+        boolean isRightCanProvideEnchantments;
         boolean isRightItemSuitable;
 
         if (!rightItemOrMaterial.isEmpty()) {
             isRightIsMaterialForRepair = resultItem.getItem().isValidRepairItem(leftItem, rightItemOrMaterial);
             isRightCanBeSacrifice = rightItemOrMaterial.is(leftItem.getItem());
-            isRightIsEnchantedBook = rightItemOrMaterial.is(Items.ENCHANTED_BOOK) && !EnchantedBookItem.getEnchantments(rightItemOrMaterial).isEmpty();
-            isRightItemSuitable = isRightIsMaterialForRepair || isRightCanBeSacrifice || isRightIsEnchantedBook;
+            isRightCanProvideEnchantments = isRightCanBeSacrifice && rightItemOrMaterial.isEnchanted() || (rightItemOrMaterial.is(Items.ENCHANTED_BOOK) && !EnchantedBookItem.getEnchantments(rightItemOrMaterial).isEmpty());
+            isRightItemSuitable = isRightIsMaterialForRepair || isRightCanBeSacrifice || isRightCanProvideEnchantments;
         } else {
             isRightIsMaterialForRepair = false;
             isRightCanBeSacrifice = false;
-            isRightIsEnchantedBook = false;
+            isRightCanProvideEnchantments = false;
             isRightItemSuitable = false;
         }
 
@@ -136,7 +136,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
                 }
             }
 
-            if (isRightCanBeSacrifice && rightItemOrMaterial.isEnchanted() || isRightIsEnchantedBook) {
+            if (isRightCanProvideEnchantments) {
                 Map<Enchantment, Integer> resultEnchantments = EnchantmentHelper.getEnchantments(resultItem);
                 Map<Enchantment, Integer> rightEnchantments = EnchantmentHelper.getEnchantments(rightItemOrMaterial);
 
@@ -144,7 +144,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
                 boolean hasUnsuitableEnchantment = false;
                 for (Enchantment enchantment : rightEnchantments.keySet()) {
                     int resultEnchantmentLevel = resultEnchantments.getOrDefault(enchantment, 0);
-                    int rightEnchantmentLevel = resultEnchantments.get(enchantment);
+                    int rightEnchantmentLevel = rightEnchantments.get(enchantment);
 
                     int newEnchantmentLevel;
                     if (resultEnchantmentLevel == rightEnchantmentLevel) {
@@ -179,7 +179,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
                         case VERY_RARE -> enchantmentCost = 8;
                     }
 
-                    if (isRightIsEnchantedBook) {
+                    if (isRightCanProvideEnchantments) {
                         enchantmentCost = Math.max(1, enchantmentCost / 2);
                     }
 
@@ -192,6 +192,10 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
                 }
                 EnchantmentHelper.setEnchantments(resultEnchantments, resultItem);
             }
+        }
+
+        if (itemNameChanged && !isRightItemSuitable) {
+            experienceLevelCost = COST_RENAME;
         }
 
         int reducedExperienceLevelCost = experienceLevelCost / COST_REDUCTION_FACTOR;
