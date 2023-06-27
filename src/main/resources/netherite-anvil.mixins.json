@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.gamenet.netherite_anvil.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "NetheriteAnvilMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

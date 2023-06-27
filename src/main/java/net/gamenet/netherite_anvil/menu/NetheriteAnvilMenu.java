@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Map;
 
 public class NetheriteAnvilMenu extends ItemCombinerMenu {
+    public static final int MAX_NAME_LENGTH = 50;
     private int repairItemCountCost;
     private String itemName;
     private final DataSlot cost = DataSlot.standalone();
@@ -87,8 +88,6 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
         }
 
         ItemStack resultItem = leftItem.copy();
-
-        player.sendSystemMessage(Component.literal(this.itemName + ":" + leftItem.getHoverName().getString() + ":" + resultItem.getHoverName().getString()));
 
         String leftName = leftItem.getHoverName().getString();
         boolean itemNameChanged = this.itemName != null && !StringUtils.isBlank(this.itemName) && !this.itemName.equals(leftName);

@@ -34,15 +34,39 @@ import org.jetbrains.annotations.Nullable;
 
 public class NetheriteAnvil extends FallingBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    private static final VoxelShape BASE = Block.box(2.0, 0.0, 2.0, 14.0, 4.0, 14.0);
-    private static final VoxelShape X_LEG1 = Block.box(3.0, 4.0, 4.0, 13.0, 5.0, 12.0);
-    private static final VoxelShape X_LEG2 = Block.box(4.0, 5.0, 6.0, 12.0, 10.0, 10.0);
-    private static final VoxelShape X_TOP = Block.box(0.0, 10.0, 3.0, 16.0, 16.0, 13.0);
-    private static final VoxelShape Z_LEG1 = Block.box(4.0, 4.0, 3.0, 12.0, 5.0, 13.0);
-    private static final VoxelShape Z_LEG2 = Block.box(6.0, 5.0, 4.0, 10.0, 10.0, 12.0);
-    private static final VoxelShape Z_TOP = Block.box(3.0, 10.0, 0.0, 13.0, 16.0, 16.0);
-    private static final VoxelShape X_AXIS_AABB = Shapes.or(BASE, X_LEG1, X_LEG2, X_TOP);
-    private static final VoxelShape Z_AXIS_AABB = Shapes.or(BASE, Z_LEG1, Z_LEG2, Z_TOP);
+    private static final VoxelShape COUNTERPART = Block.box(0.0, 7.0, 2.0, 16.0, 14.0, 14.0);
+    private static final VoxelShape LEFT_DETAIL = Block.box(3.0, 8.0, 14.0, 13.0, 13.0, 15.0);
+    private static final VoxelShape RIGHT_DETAIL = Block.box(3.0, 8.0, 1.0, 13.0, 13.0, 2.0);
+    private static final VoxelShape STRENGTH = Block.box(2.0, 5.0, 3.0, 14.0, 7.0, 13.0);
+    private static final VoxelShape BOTTOM = Block.box(2.0, 0.0, 2.0, 14.0, 1.0, 14.0);
+    private static final VoxelShape FOOT = Block.box(4.0, 1.0, 4.0, 12.0, 2.0, 12.0);
+    private static final VoxelShape TOWER = Block.box(4.0, 2.0, 5.0, 12.0, 5.0, 11.0);
+    private static final VoxelShape COUNTERPART_ROTATED = Block.box(2.0, 7.0, 0.0, 14.0, 14.0, 16.0);
+    private static final VoxelShape LEFT_DETAIL_ROTATED = Block.box(1.0, 8.0, 3.0, 2.0, 13.0, 13.0);
+    private static final VoxelShape RIGHT_DETAIL_ROTATED = Block.box(14.0, 8.0, 3.0, 15.0, 13.0, 13.0);
+    private static final VoxelShape STRENGTH_ROTATED = Block.box(3.0, 5.0, 2.0, 13.0, 7.0, 14.0);
+    private static final VoxelShape BOTTOM_ROTATED = Block.box(2.0, 0.0, 2.0, 14.0, 1.0, 14.0);
+    private static final VoxelShape FOOT_ROTATED = Block.box(4.0, 1.0, 4.0, 12.0, 2.0, 12.0);
+    private static final VoxelShape TOWER_ROTATED = Block.box(5.0, 2.0, 4.0, 11.0, 5.0, 12.0);
+    private static final VoxelShape SHAPE = Shapes.or(
+            COUNTERPART,
+            LEFT_DETAIL,
+            RIGHT_DETAIL,
+            STRENGTH,
+            BOTTOM,
+            FOOT,
+            TOWER
+    );
+    private static final VoxelShape SHAPE_ROTATED = Shapes.or(
+            COUNTERPART_ROTATED,
+            LEFT_DETAIL_ROTATED,
+            RIGHT_DETAIL_ROTATED,
+            STRENGTH_ROTATED,
+            BOTTOM_ROTATED,
+            FOOT_ROTATED,
+            TOWER_ROTATED
+    );
+
     private static final Component CONTAINER_TITLE = Component.translatable("container.repair");
     private static final float FALL_DAMAGE_PER_DISTANCE = 5.0f;
     private static final int FALL_DAMAGE_MAX = 150;
@@ -77,9 +101,9 @@ public class NetheriteAnvil extends FallingBlock {
     public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
         Direction direction = blockState.getValue(FACING);
         if (direction.getAxis() == Direction.Axis.X) {
-            return X_AXIS_AABB;
+            return SHAPE_ROTATED;
         }
-        return Z_AXIS_AABB;
+        return SHAPE;
     }
 
     @Override

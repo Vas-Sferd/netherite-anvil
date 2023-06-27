@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -84,19 +83,18 @@ public class NetheriteAnvilScreen
         return super.keyPressed(i, j, k);
     }
 
-    private void onNameChanged(String string) {
-        if (string.isEmpty()) {
+    private void onNameChanged(String name) {
+        if (name.isEmpty()) {
             return;
         }
-        String string2 = string;
         Slot slot = ((NetheriteAnvilMenu)this.menu).getSlot(0);
-        if (slot != null && slot.hasItem() && !slot.getItem().hasCustomHoverName() && string2.equals(slot.getItem().getHoverName().getString())) {
-            string2 = "";
+        if (slot != null && slot.hasItem() && !slot.getItem().hasCustomHoverName() && name.equals(slot.getItem().getHoverName().getString())) {
+            name = "";
         }
-        ((NetheriteAnvilMenu)this.menu).setItemName(string2);
+        ((NetheriteAnvilMenu)this.menu).setItemName(name);
         assert this.minecraft != null;
         assert this.minecraft.player != null;
-        this.minecraft.player.connection.send(new ServerboundRenameItemPacket(string2));
+        this.minecraft.player.connection.send(new ServerboundRenameItemPacket(name));
     }
 
     @Override

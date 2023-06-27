@@ -6,7 +6,7 @@
   "description": "Add a upgraded anvil variation",
   "authors": ["Vas Sferd"],
   "contact": {
-    "repo": "https://github.com/sferd/netherite-anvill"
+    "repo": "https://github.com/Vas-Sferd/netherite-anvil"
   },
   "license": "BSD-3-Clause",
   "icon": "assets/netherite-anvil/icon.png",
@@ -19,6 +19,9 @@
       "net.gamenet.netherite_anvil.NetheriteAnvilModClient"
     ]
   },
+  "mixins": [
+    "netherite-anvil.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
