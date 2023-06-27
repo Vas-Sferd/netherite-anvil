@@ -8,7 +8,7 @@
   "contact": {
     "repo": "https://github.com/Vas-Sferd/netherite-anvil"
   },
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "icon": "assets/netherite-anvil/icon.png",
   "environment": "*",
   "entrypoints": {
