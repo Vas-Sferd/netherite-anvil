@@ -57,7 +57,7 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
         this.inputSlots.setItem(0, ItemStack.EMPTY);
         if (this.repairItemCountCost > 0) {
             ItemStack itemStack2 = this.inputSlots.getItem(1);
-            if (!itemStack2.isEmpty() && itemStack2.getCount() > this.repairItemCountCost) {
+            if (!itemStack2.isEmpty() && itemStack2.getCount() >= this.repairItemCountCost) {
                 itemStack2.shrink(this.repairItemCountCost);
                 this.inputSlots.setItem(1, itemStack2);
             } else {
@@ -198,11 +198,10 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
             experienceLevelCost = Math.min(40, experienceLevelCost * resultItem.getCount());
         }
 
-        if (itemNameChanged && !isRightItemSuitable) {
-            experienceLevelCost = COST_RENAME;
-        }
-
         int reducedExperienceLevelCost = experienceLevelCost / COST_REDUCTION_FACTOR;
+        if (isRightItemSuitable) {
+            reducedExperienceLevelCost = Math.max(1, reducedExperienceLevelCost);
+        }
 
         boolean isSomethingChanged = (itemNameChanged && rightItemOrMaterial.isEmpty()) || isRightItemSuitable;
         boolean isExperienceLimitExceed = reducedExperienceLevelCost >= COST_MAX && !this.player.getAbilities().instabuild;
@@ -239,7 +238,12 @@ public class NetheriteAnvilMenu extends ItemCombinerMenu {
             repairedPerOneMaterial = left.getMaxDamage();
         }
 
-        this.repairItemCountCost = Math.min(left.getDamageValue() % repairedPerOneMaterial, material.getCount());
+        int needMaterialCountForFullRepair = left.getDamageValue() / repairedPerOneMaterial;
+        if (needMaterialCountForFullRepair * repairedPerOneMaterial < left.getDamageValue()) {
+            needMaterialCountForFullRepair += 1;
+        }
+
+        this.repairItemCountCost = Math.min(needMaterialCountForFullRepair, material.getCount());
         int repairedDamageValue = Math.max(0, left.getDamageValue() - this.repairItemCountCost * repairedPerOneMaterial);
         left.setDamageValue(repairedDamageValue);
         return this.repairItemCountCost;
